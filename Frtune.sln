@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A542BAA8-EFF6-421B-9B47-F0910C10A5B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frtune.Core", "src\Frtune.Core\Frtune.Core.csproj", "{A36490BE-179C-4AC0-859E-5161584E48A1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5A9DFE54-8DC3-43DF-B1A3-940FAECACC68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frtune.Core.Tests", "tests\Frtune.Core.Tests\Frtune.Core.Tests.csproj", "{E4A89AFA-6D8F-47A1-86CC-0974C66C7036}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A36490BE-179C-4AC0-859E-5161584E48A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A36490BE-179C-4AC0-859E-5161584E48A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A36490BE-179C-4AC0-859E-5161584E48A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A36490BE-179C-4AC0-859E-5161584E48A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4A89AFA-6D8F-47A1-86CC-0974C66C7036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4A89AFA-6D8F-47A1-86CC-0974C66C7036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4A89AFA-6D8F-47A1-86CC-0974C66C7036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4A89AFA-6D8F-47A1-86CC-0974C66C7036}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A36490BE-179C-4AC0-859E-5161584E48A1} = {A542BAA8-EFF6-421B-9B47-F0910C10A5B1}
+		{E4A89AFA-6D8F-47A1-86CC-0974C66C7036} = {5A9DFE54-8DC3-43DF-B1A3-940FAECACC68}
+	EndGlobalSection
+EndGlobal
