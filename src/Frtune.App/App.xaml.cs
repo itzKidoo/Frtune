@@ -30,7 +30,8 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            MessageBox.Show("frtune couldn't start:\n\n" + ex.Message, "frtune", MessageBoxButton.OK, MessageBoxImage.Error);
+            var log = WriteCrashLog(ex);
+            MessageBox.Show($"frtune couldn't start:\n\n{ex.Message}\n\nDetails were saved to:\n{log}", "frtune", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
             return;
         }
@@ -40,6 +41,19 @@ public partial class App : Application
         MainWindow = window;
         window.Show();
         await vm.InitializeAsync();
+    }
+
+    /// <summary>Writes the full exception (with stack trace) so startup problems can be diagnosed.</summary>
+    private static string WriteCrashLog(Exception ex)
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(AppServices.DataDir);
+            var path = System.IO.Path.Combine(AppServices.DataDir, "crash.log");
+            System.IO.File.AppendAllText(path, $"[{DateTime.Now:u}] {ex}\r\n\r\n");
+            return path;
+        }
+        catch { return "(could not write crash.log)"; }
     }
 
     private static void RunAutoClean()

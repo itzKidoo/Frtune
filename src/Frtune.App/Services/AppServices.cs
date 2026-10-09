@@ -45,8 +45,10 @@ public sealed class AppServices
         Settings = AppSettings.Load(SettingsPath);
         Services = new WindowsServiceManager(Registry, Commands);
         SystemInfo = new SystemInfoProvider(Registry);
-        Profile = SystemInfo.Detect();
+        Profile = SystemInfo.Detect(out var detectError);
         Log = new ChangeLog(Path.Combine(DataDir, "changelog.json"));
+        if (detectError is not null)
+            Log.Add("error", "Hardware detection failed; using safe defaults", false, error: detectError);
         Backups = new JsonBackupStore(Path.Combine(DataDir, "backups"));
         Engine = new TweakEngine(MakeContext(), Backups, Log, new RestorePointService(Commands),
             new RegExportBackupExporter(Path.Combine(DataDir, "backups", "raw"), Commands));

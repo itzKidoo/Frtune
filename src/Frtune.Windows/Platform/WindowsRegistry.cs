@@ -3,18 +3,34 @@ using Microsoft.Win32;
 
 namespace Frtune.Windows.Platform;
 
-/// <summary>Real registry, always the 64-bit view so 32/64-bit redirection never hides a key.</summary>
+/// <summary>
+/// Real registry, always the 64-bit view so 32/64-bit redirection never hides a key.
+/// Some keys (e.g. ...\Control\Class\{guid}\Properties) are readable only by SYSTEM, even for
+/// administrators. Reads treat such keys as unreadable rather than crashing; writes still throw.
+/// </summary>
 public sealed class WindowsRegistry : IRegistry
 {
+    private static bool IsDenied(Exception e) => e is System.Security.SecurityException or UnauthorizedAccessException;
+
+    /// <summary>Opens a key for reading; null when missing. Sets <paramref name="denied"/> when it exists but can't be read.</summary>
+    private static RegistryKey? OpenRead(RegistryKey b, string keyPath, out bool denied)
+    {
+        denied = false;
+        try { return b.OpenSubKey(keyPath); }
+        catch (Exception e) when (IsDenied(e)) { denied = true; return null; }
+    }
+
     private static RegistryKey Base(RegHive hive) => RegistryKey.OpenBaseKey(
         hive == RegHive.LocalMachine ? RegistryHive.LocalMachine : RegistryHive.CurrentUser, RegistryView.Registry64);
 
     public RegValue? GetValue(RegHive hive, string keyPath, string name)
     {
         using var b = Base(hive);
-        using var key = b.OpenSubKey(keyPath);
+        using var key = OpenRead(b, keyPath, out _);
         if (key is null) return null;
-        var data = key.GetValue(name, null, RegistryValueOptions.DoNotExpandEnvironmentNames);
+        object? data;
+        try { data = key.GetValue(name, null, RegistryValueOptions.DoNotExpandEnvironmentNames); }
+        catch (Exception e) when (IsDenied(e)) { return null; }
         if (data is null) return null;
         return key.GetValueKind(name) switch
         {
@@ -53,8 +69,8 @@ public sealed class WindowsRegistry : IRegistry
     public bool KeyExists(RegHive hive, string keyPath)
     {
         using var b = Base(hive);
-        using var key = b.OpenSubKey(keyPath);
-        return key is not null;
+        using var key = OpenRead(b, keyPath, out var denied);
+        return key is not null || denied;
     }
 
     public void DeleteKeyTree(RegHive hive, string keyPath)
@@ -66,7 +82,8 @@ public sealed class WindowsRegistry : IRegistry
     public bool IsTreeEmpty(RegHive hive, string keyPath)
     {
         using var b = Base(hive);
-        using var key = b.OpenSubKey(keyPath);
+        using var key = OpenRead(b, keyPath, out var denied);
+        if (denied) return false; // can't prove it's empty, so never delete it
         return key is null || IsEmpty(key);
 
         static bool IsEmpty(RegistryKey k)
@@ -74,8 +91,8 @@ public sealed class WindowsRegistry : IRegistry
             if (k.ValueCount > 0) return false;
             foreach (var name in k.GetSubKeyNames())
             {
-                using var sub = k.OpenSubKey(name);
-                if (sub is not null && !IsEmpty(sub)) return false;
+                using var sub = OpenRead(k, name, out var subDenied);
+                if (subDenied || (sub is not null && !IsEmpty(sub))) return false;
             }
             return true;
         }
@@ -84,9 +101,9 @@ public sealed class WindowsRegistry : IRegistry
     public IReadOnlyList<string> GetSubKeyNames(RegHive hive, string keyPath)
     {
         using var b = Base(hive);
-        using var key = b.OpenSubKey(keyPath);
+        using var key = OpenRead(b, keyPath, out _);
         if (key is null) return Array.Empty<string>();
         try { return key.GetSubKeyNames(); }
-        catch (System.Security.SecurityException) { return Array.Empty<string>(); }
+        catch (Exception e) when (IsDenied(e)) { return Array.Empty<string>(); }
     }
 }

@@ -30,7 +30,22 @@ public sealed class SystemInfoProvider
     private readonly IRegistry _registry;
     public SystemInfoProvider(IRegistry registry) => _registry = registry;
 
-    public SystemProfile Detect()
+    /// <summary>Never throws: if detection fails, a conservative default profile is used and the error is returned.</summary>
+    public SystemProfile Detect(out string? error)
+    {
+        try
+        {
+            error = null;
+            return DetectCore();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            return new SystemProfile { OsName = "Windows", Build = Environment.OSVersion.Version.Build, CpuThreads = Environment.ProcessorCount };
+        }
+    }
+
+    private SystemProfile DetectCore()
     {
         const string cv = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
         var build = int.TryParse(_registry.GetValue(RegHive.LocalMachine, cv, "CurrentBuildNumber")?.Data as string, out var b) ? b : Environment.OSVersion.Version.Build;
@@ -87,7 +102,8 @@ public sealed class SystemInfoProvider
 
         // Win32_VideoController.AdapterRAM is 32-bit and caps at 4 GB, so read the 64-bit value from the driver key.
         const string cls = @"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}";
-        foreach (var sub in _registry.GetSubKeyNames(RegHive.LocalMachine, cls))
+        // Adapter instances are the 4-digit subkeys; skip "Properties" and "Configuration" (SYSTEM-only).
+        foreach (var sub in _registry.GetSubKeyNames(RegHive.LocalMachine, cls).Where(n => n.Length == 4 && n.All(char.IsDigit)))
         {
             var desc = _registry.GetValue(RegHive.LocalMachine, $@"{cls}\{sub}", "DriverDesc")?.Data as string;
             var mem = _registry.GetValue(RegHive.LocalMachine, $@"{cls}\{sub}", "HardwareInformation.qwMemorySize");
@@ -114,6 +130,12 @@ public sealed class SystemInfoProvider
     }
 
     public HardwareDetails Details()
+    {
+        try { return DetailsCore(); }
+        catch { return new HardwareDetails(); }
+    }
+
+    private HardwareDetails DetailsCore()
     {
         var cpu = Query("SELECT Name, SocketDesignation, MaxClockSpeed, L2CacheSize, L3CacheSize FROM Win32_Processor", o => o).FirstOrDefault();
         return new HardwareDetails
