@@ -1,0 +1,69 @@
+<UserControl x:Class="Frtune.App.Views.BenchmarkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,18,10,18">
+        <StackPanel Margin="0,0,14,0">
+            <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" />
+            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" Margin="0,4,0,18" FontSize="13" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Label" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Text="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="160" />
+                    <Button Style="{StaticResource PrimaryButton}" Content="Run benchmark" Command="{Binding RunCommand}" Margin="10,0,0,0"
+                            IsEnabled="{Binding Running, Converter={StaticResource InverseBool}}" />
+                    <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="8,0,0,0" Visibility="{Binding Running, Converter={StaticResource BoolToVis}}" />
+                    <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="14,0,0,0" Foreground="{DynamicResource MutedBrush}" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14" Visibility="{Binding Comparison.Count, Converter={StaticResource EmptyToCollapsed}}">
+                <StackPanel>
+                    <TextBlock Text="Last two runs" Style="{StaticResource H2}" />
+                    <TextBlock Text="{Binding CompareTitle}" Style="{StaticResource Muted}" Margin="0,2,0,10" />
+                    <ItemsControl ItemsSource="{Binding Comparison}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="200" />
+                                        <ColumnDefinition Width="140" />
+                                        <ColumnDefinition Width="140" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Metric}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Before}" Foreground="{DynamicResource MutedBrush}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding After}" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="Ch" Grid.Column="3" Text="{Binding Change}" Foreground="{DynamicResource SafeBrush}" FontWeight="SemiBold" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Better}" Value="False">
+                                        <Setter TargetName="Ch" Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Differences under ~3% are normal run-to-run noise." Style="{StaticResource Muted}" Margin="0,8,0,0" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="History" Style="{StaticResource H2}" Margin="0,0,0,10" />
+            <Border Style="{StaticResource Card}">
+                <ItemsControl ItemsSource="{Binding History}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,3" FontSize="12.5">
+                                <Run Text="{Binding Label, Mode=OneWay}" FontWeight="SemiBold" />
+                                <Run Text="{Binding When, Mode=OneWay, StringFormat={}{0:g}}" Foreground="{DynamicResource FaintBrush}" />
+                                <Run Text="  CPU 1T" Foreground="{DynamicResource MutedBrush}" /><Run Text="{Binding CpuSingle, Mode=OneWay, StringFormat={} {0:0}}" />
+                                <Run Text="  CPU nT" Foreground="{DynamicResource MutedBrush}" /><Run Text="{Binding CpuMulti, Mode=OneWay, StringFormat={} {0:0}}" />
+                                <Run Text="  RAM" Foreground="{DynamicResource MutedBrush}" /><Run Text="{Binding MemoryGbps, Mode=OneWay, StringFormat={} {0:0.0} GB/s}" />
+                                <Run Text="  Disk W/R" Foreground="{DynamicResource MutedBrush}" /><Run Text="{Binding DiskWriteMBps, Mode=OneWay, StringFormat={} {0:0}}" /><Run Text=" /" /><Run Text="{Binding DiskReadMBps, Mode=OneWay, StringFormat={} {0:0} MB/s}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

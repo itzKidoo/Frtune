@@ -1,0 +1,60 @@
+<UserControl x:Class="Frtune.App.Views.HardwareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,18,10,18">
+        <StackPanel Margin="0,0,14,0">
+            <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" />
+            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" Margin="0,4,0,18" FontSize="13" />
+            <TextBlock Text="Reading hardware…" Style="{StaticResource Muted}" Visibility="{Binding Loading, Converter={StaticResource BoolToVis}}" />
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14" BorderBrush="{DynamicResource AccentSoftBrush}"
+                    Visibility="{Binding Notes.Count, Converter={StaticResource EmptyToCollapsed}}">
+                <StackPanel>
+                    <TextBlock Text="Notes for this PC" FontWeight="SemiBold" Margin="0,0,0,6" />
+                    <ItemsControl ItemsSource="{Binding Notes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,3">
+                                    <TextBlock Text="&#xE946;" Style="{StaticResource Icon}" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,2,8,0" VerticalAlignment="Top" />
+                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="12.5" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Card}" Margin="0,0,14,14">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="{Binding Glyph}" Style="{StaticResource Icon}" Foreground="{DynamicResource AccentBrush}" />
+                                    <TextBlock Text="{Binding Title}" Style="{StaticResource H2}" Margin="8,0,0,0" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="140" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Label}" Foreground="{DynamicResource MutedBrush}" FontSize="12.5" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Value}" FontSize="12.5" TextWrapping="Wrap" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

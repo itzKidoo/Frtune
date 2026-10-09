@@ -8,4 +8,8 @@
     <Company>frtune</Company>
     <Product>frtune</Product>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- Keep publish output to the single exe: symbols go inside the assemblies. -->
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
 </Project>

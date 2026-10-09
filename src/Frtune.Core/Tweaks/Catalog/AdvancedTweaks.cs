@@ -40,7 +40,7 @@ internal static class AdvancedTweaks
                 TweakCategory.Advanced, TweakRisk.Advanced)
             .Hklm(@"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity", "Enabled", 0)
             .Hklm(@"SYSTEM\CurrentControlSet\Control\DeviceGuard", "EnableVirtualizationBasedSecurity", 0)
-            .Warn("Memory Integrity stops malicious or vulnerable drivers from tampering with the Windows kernel. Some anti-cheat systems (for example Valorant's Vanguard on Windows 11) and corporate policies require it. Without it, kernel-level malware is easier to install.")
+            .Warn("Memory Integrity stops malicious or vulnerable drivers from tampering with the Windows kernel. Some anti-cheat systems and work/school policies expect it to be on. Without it, kernel-level malware is easier to install.")
             .Needs(RestartKind.Reboot);
 
         yield return new Tweak("adv.defender", "Pause Defender real-time protection (temporary)",

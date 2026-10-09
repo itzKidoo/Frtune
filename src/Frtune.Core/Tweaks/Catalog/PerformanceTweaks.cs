@@ -136,6 +136,8 @@ internal static class PerformanceTweaks
             if (ctx.Commands.Run("powercfg.exe", $"/setactive {PowerGuids.UltimatePerformanceTemplate}").Success) return;
             var dup = ctx.Commands.Run("powercfg.exe", $"/duplicatescheme {PowerGuids.UltimatePerformanceTemplate}").EnsureSuccess("powercfg /duplicatescheme");
             var guid = System.Text.RegularExpressions.Regex.Match(dup.StdOut, "[0-9a-fA-F-]{36}").Value;
+            // Plan names are translated on non-English Windows, so tag ours to recognise it later.
+            ctx.Commands.Run("powercfg.exe", $"/changename {guid} \"Ultimate Performance (frtune)\"");
             ctx.Commands.Run("powercfg.exe", $"/setactive {guid}").EnsureSuccess("powercfg /setactive");
         },
         (ctx, captured) => { if (captured is not null) ctx.Commands.Run("powercfg.exe", $"/setactive {captured}").EnsureSuccess("powercfg /setactive"); },
@@ -143,6 +145,7 @@ internal static class PerformanceTweaks
         {
             var r = ctx.Commands.Run("powercfg.exe", "/getactivescheme");
             return r.StdOut.Contains(PowerGuids.UltimatePerformanceTemplate, StringComparison.OrdinalIgnoreCase)
-                || r.StdOut.Contains("Ultimate", StringComparison.OrdinalIgnoreCase);
+                || r.StdOut.Contains("(frtune)", StringComparison.OrdinalIgnoreCase)
+                || r.StdOut.Contains("Ultimate Performance", StringComparison.OrdinalIgnoreCase);
         });
 }

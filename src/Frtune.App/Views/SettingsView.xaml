@@ -1,0 +1,94 @@
+<UserControl x:Class="Frtune.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,18,10,18">
+        <StackPanel Margin="0,0,14,0" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" Style="{StaticResource H1}" Margin="0,0,0,18" />
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Accent colour" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding Accents}" Margin="0,10,0,10">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Margin="0,0,10,0" ToolTip="{Binding Name}" Cursor="Hand"
+                                        Command="{Binding DataContext.PickAccentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="S" Width="30" Height="30" CornerRadius="15" Background="{Binding Hex, Converter={StaticResource HexToBrush}}"
+                                                    BorderBrush="White" BorderThickness="0" />
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="S" Property="BorderThickness" Value="2" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Custom hex" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource MutedBrush}" />
+                        <TextBox Text="{Binding AccentHex, UpdateSourceTrigger=PropertyChanged, Delay=300}" Width="120" FontFamily="{StaticResource MonoFont}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Safety" FontWeight="SemiBold" Margin="0,0,0,10" />
+                    <DockPanel Margin="0,0,0,12">
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding CreateRestorePoint}" />
+                        <StackPanel>
+                            <TextBlock Text="Create a System Restore point before applying" />
+                            <TextBlock Text="Strongly recommended. If it fails, frtune asks before continuing." Style="{StaticResource Muted}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel Margin="0,0,0,12">
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ExportRawBackup}" />
+                        <StackPanel>
+                            <TextBlock Text="Export .reg files and service settings before applying" />
+                            <TextBlock Text="Plain files you can double-click to restore by hand, even without frtune." Style="{StaticResource Muted}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox DockPanel.Dock="Right" Text="{Binding UpdatePauseDays, UpdateSourceTrigger=PropertyChanged, Delay=400}" Width="70" />
+                        <StackPanel>
+                            <TextBlock Text="Days to pause Windows Update for (Advanced page)" />
+                            <TextBlock Text="1 to 35. Windows resumes updates automatically afterwards." Style="{StaticResource Muted}" />
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Profiles" FontWeight="SemiBold" />
+                    <TextBlock Text="Save your selection as a JSON file and load it on another PC. Importing only pre-selects tweaks; nothing changes until you press Apply, and Advanced tweaks are never imported." Style="{StaticResource Muted}" Margin="0,4,0,10" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Export profile…" Command="{Binding ExportProfileCommand}" Margin="0,0,8,0" />
+                        <Button Content="Import profile…" Command="{Binding ImportProfileCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="About and privacy" FontWeight="SemiBold" />
+                    <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,8"
+                               Text="frtune has no telemetry, no ads, no update checks and no accounts. It only uses the network when you press a button that needs it (DNS latency test, DNS change). Everything it changes is listed before you confirm and recorded in the change log." />
+                    <TextBlock Text="Detected system" FontSize="11" Foreground="{DynamicResource FaintBrush}" />
+                    <TextBlock Text="{Binding SystemSummary}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,8" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding DataFolder}" FontFamily="{StaticResource MonoFont}" FontSize="11.5" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+                        <Button Content="Open" Command="{Binding OpenDataFolderCommand}" Margin="10,0,0,0" Padding="10,4" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

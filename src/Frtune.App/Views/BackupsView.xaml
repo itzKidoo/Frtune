@@ -1,0 +1,93 @@
+<UserControl x:Class="Frtune.App.Views.BackupsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,18,10,18">
+        <StackPanel Margin="0,0,14,0">
+            <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" />
+            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" Margin="0,4,0,18" FontSize="13" />
+
+            <UniformGrid Columns="3" Margin="0,0,0,14">
+                <Border Style="{StaticResource Card}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="Restore to defaults" FontWeight="SemiBold" />
+                        <TextBlock Text="Reverts every tweak frtune applied, using the saved original values." Style="{StaticResource Muted}" Margin="0,4,0,10" />
+                        <Button Content="Restore everything…" Style="{StaticResource DangerButton}" Command="{Binding RestoreAllCommand}" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="System Restore" FontWeight="SemiBold" />
+                        <TextBlock Text="frtune creates a restore point before every Apply. You can also make one now, or open Windows' restore tool." Style="{StaticResource Muted}" Margin="0,4,0,10" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Create now" Command="{Binding CreateRestorePointCommand}" Margin="0,0,8,0" />
+                            <Button Content="Open System Restore" Command="{Binding OpenSystemRestoreCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Backup files" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Muted}" Margin="0,4,0,10">
+                            <Run Text="snapshots.json, raw .reg exports and changelog.json are in " /><Run Text="{Binding DataFolder, Mode=OneWay}" />
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Open folder" Command="{Binding OpenFolderCommand}" Margin="0,0,8,0" />
+                            <Button Content="Open change log" Command="{Binding OpenLogFileCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <TextBlock Text="Applied by frtune" Style="{StaticResource H2}" Margin="0,0,0,10" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <TextBlock Text="Nothing applied yet." Foreground="{DynamicResource FaintBrush}" Visibility="{Binding Applied.Count, Converter={StaticResource EmptyToCollapsed}, ConverterParameter=Invert}" />
+                    <ItemsControl ItemsSource="{Binding Applied}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,3">
+                                    <Button DockPanel.Dock="Right" Content="Revert" Padding="12,4"
+                                            Command="{Binding DataContext.RevertCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                    <TextBlock DockPanel.Dock="Right" Width="230" VerticalAlignment="Center" Style="{StaticResource Muted}">
+                                        <Run Text="{Binding When, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding Values, Mode=OneWay}" /><Run Text=" value(s) saved" />
+                                    </TextBlock>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding TweakId}" FontFamily="{StaticResource MonoFont}" FontSize="10.5" Foreground="{DynamicResource FaintBrush}" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Change log" Style="{StaticResource H2}" Margin="0,0,0,10" />
+            <Border Style="{StaticResource Card}">
+                <ItemsControl ItemsSource="{Binding Log}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel Margin="0,4" ToolTip="{Binding Details}">
+                                <TextBlock x:Name="G" Text="{Binding Glyph}" Style="{StaticResource Icon}" FontSize="12" Foreground="{DynamicResource SafeBrush}" Margin="0,0,10,0" />
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding When}" Foreground="{DynamicResource FaintBrush}" FontSize="11.5" VerticalAlignment="Center" />
+                                <Border DockPanel.Dock="Left" Style="{StaticResource Pill}" Margin="0,0,10,0" Width="96">
+                                    <TextBlock Text="{Binding Action}" />
+                                </Border>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" FontSize="12.5" />
+                                    <TextBlock Text="{Binding Details}" FontSize="11" Foreground="{DynamicResource FaintBrush}" TextTrimming="CharacterEllipsis" MaxHeight="30"
+                                               Visibility="{Binding Details, Converter={StaticResource EmptyToCollapsed}}" />
+                                </StackPanel>
+                            </DockPanel>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Success}" Value="False">
+                                    <Setter TargetName="G" Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

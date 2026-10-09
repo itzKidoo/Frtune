@@ -1,0 +1,257 @@
+<Window x:Class="Frtune.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Frtune.App.ViewModels"
+        xmlns:v="clr-namespace:Frtune.App.Views"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        Title="frtune" Width="1280" Height="820" MinWidth="980" MinHeight="640"
+        WindowStartupLocation="CenterScreen" Background="{DynamicResource WindowBrush}"
+        FontFamily="{DynamicResource UiFont}" Foreground="{DynamicResource TextBrush}"
+        UseLayoutRounding="True" TextOptions.TextFormattingMode="Display"
+        Icon="Assets/frtune.ico">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="44" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Views/Templates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <CollectionViewSource x:Key="NavPages" Source="{Binding Pages}">
+                <CollectionViewSource.GroupDescriptions>
+                    <PropertyGroupDescription PropertyName="Group" />
+                </CollectionViewSource.GroupDescriptions>
+            </CollectionViewSource>
+
+            <Style x:Key="NavListItem" TargetType="ListBoxItem">
+                <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Margin" Value="0,1" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Grid>
+                                <Border x:Name="Bd" CornerRadius="8" Background="Transparent" Padding="12,8">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Glyph}" Style="{StaticResource Icon}" FontSize="15" Width="22" />
+                                        <TextBlock Text="{Binding Title}" Margin="8,0,0,0" FontSize="13.5" VerticalAlignment="Center"
+                                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    </StackPanel>
+                                </Border>
+                                <Border x:Name="Indicator" Width="3" Height="16" CornerRadius="2" HorizontalAlignment="Left"
+                                        Background="{DynamicResource AccentBrush}" Opacity="0" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#0FFFFFFF" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                                    <Setter TargetName="Indicator" Property="Opacity" Value="1" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid x:Name="Root">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ===================== Title bar ===================== -->
+        <Grid Grid.Row="0" Background="{DynamicResource SidebarBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="232" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Margin="18,0,0,0" VerticalAlignment="Center">
+                <Border Width="22" Height="22" CornerRadius="6" Background="{DynamicResource AccentBrush}">
+                    <TextBlock Text="f" FontWeight="Bold" FontSize="14" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
+                </Border>
+                <TextBlock Text="frtune" FontWeight="SemiBold" FontSize="14" Margin="10,0,0,0" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Search -->
+            <Grid Grid.Column="1" Width="420" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0,0,0"
+                  WindowChrome.IsHitTestVisibleInChrome="True">
+                <TextBox x:Name="SearchBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=150}" Padding="32,6,10,6" />
+                <TextBlock Text="&#xE721;" Style="{StaticResource Icon}" FontSize="13" Foreground="{DynamicResource MutedBrush}" Margin="11,0,0,0" IsHitTestVisible="False" />
+                <TextBlock Text="Search all tweaks, registry keys, services…  (Ctrl+F)" Foreground="{DynamicResource FaintBrush}" FontSize="12.5"
+                           Margin="33,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                           Visibility="{Binding SearchText, Converter={StaticResource EmptyToCollapsed}, ConverterParameter=Invert}" />
+            </Grid>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" Click="Minimize_Click" ToolTip="Minimize" />
+                <Button x:Name="MaxButton" Style="{StaticResource CaptionButton}" Content="&#xE922;" Click="Maximize_Click" ToolTip="Maximize" />
+                <Button Style="{StaticResource CloseCaptionButton}" Content="&#xE8BB;" Click="Close_Click" ToolTip="Close" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="232" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ===================== Sidebar ===================== -->
+            <Grid Background="{DynamicResource SidebarBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ListBox ItemsSource="{Binding Source={StaticResource NavPages}}" SelectedItem="{Binding CurrentPage, Mode=TwoWay}"
+                         Background="Transparent" BorderThickness="0" Padding="10,4,10,10"
+                         ItemContainerStyle="{StaticResource NavListItem}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource FaintBrush}"
+                                               Margin="12,14,0,6" Visibility="{Binding Name, Converter={StaticResource EmptyToCollapsed}}" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                </ListBox>
+                <Border Grid.Row="1" Margin="12" Padding="12,10" CornerRadius="10" Background="{DynamicResource SurfaceBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ToolTip="{Binding SystemSummary}">
+                    <StackPanel>
+                        <TextBlock Text="This PC" FontSize="11" Foreground="{DynamicResource FaintBrush}" />
+                        <TextBlock Text="{Binding Dashboard.Os}" FontSize="12" Margin="0,2,0,0" />
+                        <TextBlock Text="{Binding Dashboard.Cpu.Detail}" FontSize="11" Foreground="{DynamicResource MutedBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Dashboard.Gpu.Detail}" FontSize="11" Foreground="{DynamicResource MutedBrush}" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ===================== Content ===================== -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Restart banner -->
+                <Border Grid.Row="0" Margin="24,14,24,0" Padding="14,10" CornerRadius="10" Background="{DynamicResource ModerateSoftBrush}"
+                        BorderBrush="{DynamicResource ModerateBrush}" BorderThickness="1"
+                        Visibility="{Binding RestartBanner, Converter={StaticResource EmptyToCollapsed}}">
+                    <DockPanel>
+                        <TextBlock Text="&#xE777;" Style="{StaticResource Icon}" Foreground="{DynamicResource ModerateBrush}" Margin="0,0,10,0" />
+                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Content="&#xE711;" FontFamily="{StaticResource IconFont}"
+                                Command="{Binding DismissRestartCommand}" Padding="8,4" ToolTip="Dismiss" />
+                        <Button DockPanel.Dock="Right" Content="{Binding RestartActionText}" Command="{Binding RestartNowCommand}" Padding="12,5" Margin="8,0" />
+                        <TextBlock Text="{Binding RestartBanner}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    </DockPanel>
+                </Border>
+
+                <ContentControl x:Name="PageHost" Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False">
+                    <ContentControl.RenderTransform>
+                        <TranslateTransform x:Name="PageShift" />
+                    </ContentControl.RenderTransform>
+                </ContentControl>
+
+                <!-- Pending changes bar -->
+                <Border Grid.Row="2" Margin="24,0,24,16" Padding="16,10" CornerRadius="12" Background="{DynamicResource SurfaceBrush}"
+                        BorderBrush="{DynamicResource AccentSoftBrush}" BorderThickness="1"
+                        Visibility="{Binding HasPending, Converter={StaticResource BoolToVis}}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="28" Height="28" CornerRadius="14" Background="{DynamicResource AccentBrush}">
+                            <TextBlock Text="{Binding PendingCount}" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource PrimaryButton}" Command="{Binding ApplyCommand}" Padding="22,9" Margin="8,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE73E;" Style="{StaticResource Icon}" FontSize="13" Foreground="White" Margin="0,0,8,0" />
+                                <TextBlock Text="Apply" Foreground="White" />
+                            </StackPanel>
+                        </Button>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Content="Discard" Command="{Binding DiscardPendingCommand}" />
+                        <StackPanel Margin="12,0" VerticalAlignment="Center">
+                            <TextBlock Text="pending change(s)" FontWeight="SemiBold" />
+                            <TextBlock Text="Nothing changes until you press Apply. You'll see the exact list first." Style="{StaticResource Muted}" FontSize="11.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ===================== Busy overlay ===================== -->
+        <Grid Grid.RowSpan="2" Background="#B00D0E13" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+            <Border Style="{StaticResource Card}" Width="440" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24">
+                <StackPanel>
+                    <TextBlock Text="Working…" Style="{StaticResource H2}" />
+                    <TextBlock Text="{Binding BusyText}" Style="{StaticResource Muted}" Margin="0,6,0,14" />
+                    <ProgressBar Value="{Binding BusyProgress}" Maximum="100" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ===================== Toasts ===================== -->
+        <ItemsControl Grid.RowSpan="2" ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                      Margin="0,0,24,84" Width="360">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border x:Name="T" Margin="0,8,0,0" Padding="14,12" CornerRadius="10" Background="{DynamicResource SurfaceBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Opacity="0">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="TX" X="40" />
+                        </Border.RenderTransform>
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.5" Color="Black" />
+                        </Border.Effect>
+                        <DockPanel>
+                            <TextBlock x:Name="G" Text="{Binding Glyph}" Style="{StaticResource Icon}" FontSize="16" Margin="0,1,12,0"
+                                       VerticalAlignment="Top" Foreground="{DynamicResource InfoBrush}" />
+                            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Padding="4" VerticalAlignment="Top"
+                                    Content="&#xE711;" FontFamily="{StaticResource IconFont}" FontSize="10"
+                                    Command="{Binding DataContext.DismissToastCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Message}" Style="{StaticResource Muted}" Margin="0,2,0,0"
+                                           Visibility="{Binding Message, Converter={StaticResource EmptyToCollapsed}}" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Kind}" Value="Success">
+                            <Setter TargetName="G" Property="Foreground" Value="{DynamicResource SafeBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Kind}" Value="Error">
+                            <Setter TargetName="G" Property="Foreground" Value="{DynamicResource DangerBrush}" />
+                            <Setter TargetName="T" Property="BorderBrush" Value="{DynamicResource DangerBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Kind}" Value="Warning">
+                            <Setter TargetName="G" Property="Foreground" Value="{DynamicResource ModerateBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Kind}" Value="Restart">
+                            <Setter TargetName="G" Property="Foreground" Value="{DynamicResource ModerateBrush}" />
+                            <Setter TargetName="T" Property="BorderBrush" Value="{DynamicResource ModerateBrush}" />
+                        </DataTrigger>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="T" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2" />
+                                    <DoubleAnimation Storyboard.TargetName="TX" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.25">
+                                        <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut" /></DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</Window>

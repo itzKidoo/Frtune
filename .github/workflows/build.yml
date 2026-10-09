@@ -1,0 +1,24 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build
+        run: dotnet build Frtune.sln -c Release
+      - name: Test
+        run: dotnet test tests/Frtune.Core.Tests -c Release --no-build
+      - name: Publish single exe
+        run: dotnet publish src/Frtune.App -c Release -r win-x64 -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frtune
+          path: publish/frtune.exe

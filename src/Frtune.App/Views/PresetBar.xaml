@@ -1,0 +1,24 @@
+<UserControl x:Class="Frtune.App.Views.PresetBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:m="clr-namespace:Frtune.Core.Model;assembly=Frtune.Core">
+    <!-- DataContext: MainViewModel -->
+    <StackPanel>
+        <TextBlock Text="PRESET" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource FaintBrush}" Margin="0,0,0,8" />
+        <WrapPanel>
+            <Button Style="{StaticResource ChipButton}" Content="Gaming" Command="{Binding SelectPresetCommand}" CommandParameter="{x:Static m:Preset.Gaming}"
+                    Tag="{Binding SelectedPreset, Converter={StaticResource EqualsConverter}, ConverterParameter=Gaming}" />
+            <Button Style="{StaticResource ChipButton}" Content="Balanced" Command="{Binding SelectPresetCommand}" CommandParameter="{x:Static m:Preset.Balanced}"
+                    Tag="{Binding SelectedPreset, Converter={StaticResource EqualsConverter}, ConverterParameter=Balanced}" />
+            <Button Style="{StaticResource ChipButton}" Content="Low-End PC" Command="{Binding SelectPresetCommand}" CommandParameter="{x:Static m:Preset.LowEnd}"
+                    Tag="{Binding SelectedPreset, Converter={StaticResource EqualsConverter}, ConverterParameter=LowEnd}" />
+            <Button Style="{StaticResource ChipButton}" Content="Privacy" Command="{Binding SelectPresetCommand}" CommandParameter="{x:Static m:Preset.Privacy}"
+                    Tag="{Binding SelectedPreset, Converter={StaticResource EqualsConverter}, ConverterParameter=Privacy}" />
+            <Button Style="{StaticResource ChipButton}" Content="Max Performance" Command="{Binding SelectPresetCommand}" CommandParameter="{x:Static m:Preset.MaxPerformance}"
+                    Tag="{Binding SelectedPreset, Converter={StaticResource EqualsConverter}, ConverterParameter=MaxPerformance}" />
+            <Button Style="{StaticResource ChipButton}" Content="Custom" Command="{Binding SelectPresetCommand}" CommandParameter="{x:Static m:Preset.None}"
+                    Tag="{Binding SelectedPreset, Converter={StaticResource EqualsConverter}, ConverterParameter=None}"
+                    ToolTip="Clear the preset selection and keep only your own choices" />
+        </WrapPanel>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,88 @@
+<UserControl x:Class="Frtune.App.Views.CleanerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,18,10,18">
+        <StackPanel Margin="0,0,14,0">
+            <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" />
+            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" Margin="0,4,0,18" FontSize="13" />
+
+            <Border Style="{StaticResource Card}" Margin="0,0,0,14">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,10">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Content="Rescan" Command="{Binding ScanCommand}" Margin="0,0,8,0" IsEnabled="{Binding Busy, Converter={StaticResource InverseBool}}" />
+                            <Button Content="Cancel" Command="{Binding CancelCommand}" Margin="0,0,8,0" Visibility="{Binding Busy, Converter={StaticResource BoolToVis}}" />
+                            <Button Style="{StaticResource PrimaryButton}" Command="{Binding CleanCommand}" Padding="20,8" IsEnabled="{Binding Busy, Converter={StaticResource InverseBool}}">
+                                <TextBlock Foreground="White"><Run Text="Clean " /><Run Text="{Binding SelectedTotal, Mode=OneWay}" /></TextBlock>
+                            </Button>
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Status}" />
+                            <ProgressBar Value="{Binding Progress}" Maximum="100" Margin="0,6,24,0" Visibility="{Binding Busy, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <ItemsControl ItemsSource="{Binding Rows}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,10,8" Padding="12,10" CornerRadius="10" Background="{DynamicResource SurfaceBrush}"
+                                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0,0,0" />
+                                        <CheckBox IsChecked="{Binding IsSelected}">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                    <Border Style="{StaticResource RiskBadge}" Tag="{Binding Risk}" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Risk}" />
+                                                    </Border>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" FontSize="11.5" />
+                                            </StackPanel>
+                                        </CheckBox>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <DockPanel Margin="0,8,0,0">
+                        <CheckBox DockPanel.Dock="Right" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding WeeklyClean}" />
+                        <StackPanel>
+                            <TextBlock Text="Weekly auto-clean" FontWeight="SemiBold" />
+                            <TextBlock Text="Task Scheduler runs frtune --autoclean on Sundays at 12:00: temp files, browser caches and crash dumps only. Logged like everything else." Style="{StaticResource Muted}" />
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="Find large and duplicate files" Style="{StaticResource H2}" />
+            <TextBlock Text="Read-only scans. Nothing is deleted unless you click Recycle on a file (it goes to the Recycle Bin)." Style="{StaticResource Muted}" Margin="0,2,0,12" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Button Content="Largest files in a folder…" Command="{Binding FindLargeCommand}" Margin="0,0,8,0" />
+                <Button Content="Duplicate files in a folder…" Command="{Binding FindDuplicatesCommand}" />
+            </StackPanel>
+            <Border Style="{StaticResource Card}" Visibility="{Binding FoundTitle, Converter={StaticResource EmptyToCollapsed}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding FoundTitle}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <ItemsControl ItemsSource="{Binding Found}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,3">
+                                    <Button DockPanel.Dock="Right" Content="Recycle" Style="{StaticResource GhostButton}" Padding="8,3"
+                                            Command="{Binding DataContext.RecycleCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                    <Button DockPanel.Dock="Right" Content="Show" Style="{StaticResource GhostButton}" Padding="8,3"
+                                            Command="{Binding DataContext.RevealCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding Info}" Width="170" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" VerticalAlignment="Center" />
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding SizeText}" Width="90" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Path}" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding Path}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

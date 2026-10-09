@@ -1,0 +1,44 @@
+<UserControl x:Class="Frtune.App.Views.QuickOptimizeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,18,10,18">
+        <StackPanel>
+            <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" />
+            <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" Margin="0,4,0,18" FontSize="13" />
+            <ItemsControl ItemsSource="{Binding Cards}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource HoverCard}" Margin="0,0,14,14" Padding="18">
+                            <DockPanel>
+                                <Button DockPanel.Dock="Bottom" Content="Select" HorizontalAlignment="Left" Margin="0,12,0,0"
+                                        Command="{Binding DataContext.Main.SelectPresetCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding Preset}" />
+                                <StackPanel>
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Right" Style="{StaticResource Pill}"><TextBlock Text="{Binding CountText}" /></Border>
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource H2}" />
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" Margin="0,6,0,8" />
+                                    <TextBlock Text="{Binding Preview}" FontSize="11" Foreground="{DynamicResource FaintBrush}" TextWrapping="Wrap" MaxHeight="64" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="Selected changes" Style="{StaticResource H2}" Margin="0,10,0,4" />
+            <TextBlock Text="These tweaks will change when you press Apply. Toggle any of them off to skip it." Style="{StaticResource Muted}" Margin="0,0,0,14" />
+            <TextBlock Text="Nothing selected yet. Pick a preset above, or toggle tweaks on the other pages." Foreground="{DynamicResource FaintBrush}"
+                       Visibility="{Binding Main.HasPending, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}" />
+            <ItemsControl ItemsSource="{Binding Pending}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

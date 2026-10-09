@@ -156,3 +156,50 @@ public class ChangeTests
         Assert.Contains(env.Commands.Calls, c => c.Contains($"/setacvalueindex 381b4222-f694-41f0-9685-ff5bb260df2e {PowerGuids.SubUsb} {PowerGuids.UsbSelectiveSuspend} 1"));
     }
 }
+
+public class CommandTweakTests
+{
+    [Fact]
+    public void Ultimate_plan_duplicates_template_when_hidden_and_revert_reactivates_previous_plan()
+    {
+        using var env = new Fakes.TestEnv();
+        var active = "381b4222-f694-41f0-9685-ff5bb260df2e";
+        env.Commands.Handler = (file, args) => args switch
+        {
+            "/getactivescheme" => new(0, $"Power Scheme GUID: {active}  (x)", ""),
+            _ when args == $"/setactive {Changes.PowerGuids.UltimatePerformanceTemplate}" => new(1, "", "not found"),
+            _ when args.StartsWith("/duplicatescheme") => new(0, "Power Scheme GUID: 11111111-2222-3333-4444-555555555555  (Ultimate Performance)", ""),
+            _ when args.StartsWith("/setactive ") => Set(args[11..]),
+            _ => new(0, "", ""),
+        };
+        Abstractions.CommandResult Set(string guid) { active = guid; return new(0, "", ""); }
+
+        var tweak = Tweaks.Catalog.TweakCatalog.All.Single(t => t.Id == "perf.ultimateplan");
+        var snap = tweak.Apply(env.Context);
+        Assert.Equal("11111111-2222-3333-4444-555555555555", active);
+        Assert.Contains(env.Commands.Calls, c => c.Contains("/changename 11111111-2222-3333-4444-555555555555"));
+
+        tweak.Revert(env.Context, snap);
+        Assert.Equal("381b4222-f694-41f0-9685-ff5bb260df2e", active);
+    }
+
+    [Fact]
+    public void Netsh_tweak_restores_the_captured_value()
+    {
+        using var env = new Fakes.TestEnv();
+        var rsc = "Enabled";
+        env.Commands.Handler = (file, args) =>
+        {
+            if (file == "netsh.exe" && args.Contains("rsc=")) rsc = args.Contains("rsc=disabled") ? "Disabled" : "Enabled";
+            return file == "powershell.exe" ? new(0, rsc + "\r\n", "") : new(0, "", "");
+        };
+        var change = Tweaks.Catalog.TweakCatalog.All.Single(t => t.Id == "net.tcpglobal")
+            .StaticChanges.Single(c => c.Key == "cmd:tcp.rsc");
+
+        var captured = change.Capture(env.Context);
+        change.Apply(env.Context);
+        Assert.Equal("Disabled", rsc);
+        change.Restore(env.Context, captured);
+        Assert.Equal("Enabled", rsc);
+    }
+}
